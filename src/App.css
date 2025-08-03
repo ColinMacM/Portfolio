@@ -375,3 +375,52 @@ html, body {
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
 }
+
+
+.about-slider {
+  padding: 2rem 0;
+}
+
+.slide-content {
+  position: relative;
+  overflow: hidden;
+  /* no more rounded corners on the frame, since you removed those */
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+}
+
+.slide-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform 0.5s ease;
+}
+
+.slide-content:hover img {
+  transform: scale(1.05);
+}
+
+.slide-content .frame-title {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+}
+
+/* Swiper arrow colors */
+.swiper-button-next,
+.swiper-button-prev {
+  color: #fff;
+}
+
+/* Swiper pagination dots */
+.swiper-pagination-bullet {
+  background: rgba(255,255,255,0.5);
+}
+.swiper-pagination-bullet-active {
+  background: #fff;
+}

@@ -1,5 +1,12 @@
+// src/App.jsx
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, EffectFade, A11y } from 'swiper';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
 import './App.css';
 
 function App() {
@@ -21,7 +28,6 @@ function App() {
 
     const handleScroll = () => {
       const frames = collage.querySelectorAll('.parallax-frame');
-
       frames.forEach((frame) => {
         const rect = frame.getBoundingClientRect();
         const offsetX = rect.left + frame.offsetWidth / 2 - window.innerWidth / 2;
@@ -81,7 +87,12 @@ function App() {
   };
 
   const renderImage = (src, alt, routeSlug) => (
-    <div className="parallax-frame" key={`${src}-${alt}`} onClick={() => navigate(`/project/${routeSlug}`)} style={{ cursor: 'pointer' }}>
+    <div
+      className="parallax-frame"
+      key={`${src}-${alt}`}
+      onClick={() => navigate(`/project/${routeSlug}`)}
+      style={{ cursor: 'pointer' }}
+    >
       <div className="parallax-inner">
         <img src={src} alt={alt} />
       </div>
@@ -94,18 +105,23 @@ function App() {
       <svg>
         <filter id="goo">
           <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-          <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo" />
+          <feColorMatrix
+            in="blur"
+            mode="matrix"
+            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10"
+            result="goo"
+          />
           <feBlend in="SourceGraphic" in2="goo" />
         </filter>
       </svg>
 
       <div className="gradients-container">
-        <div className="g1"></div>
-        <div className="g2"></div>
-        <div className="g3"></div>
-        <div className="g4"></div>
-        <div className="g5"></div>
-        <div className="interactive"></div>
+        <div className="g1" />
+        <div className="g2" />
+        <div className="g3" />
+        <div className="g4" />
+        <div className="g5" />
+        <div className="interactive" />
       </div>
 
       {activePanel === null && (
@@ -113,14 +129,46 @@ function App() {
           <div className="app">
             <div className="content-box">
               <div className="internal-tab">home</div>
-              <h1 className="main-title">hey, <span className="highlight">i’m colin!</span></h1>
-              <h2 className="subtitle">Mechatronics Engineer who loves robotics, offroading, and AI</h2>
-              <img className="bidoof" src="/src/assets/bidoof.png" alt="Bidoof" />
+              <h1 className="main-title">
+                hey, <span className="highlight">i’m colin!</span>
+              </h1>
+              <h2 className="subtitle">
+                Mechatronics Engineer who loves robotics, offroading, and AI
+              </h2>
+              <img
+                className="bidoof"
+                src="/src/assets/bidoof.png"
+                alt="Bidoof"
+              />
               <div className="icon-row">
-                <div className="icon-item" onClick={() => handlePanelClick('about')}><img src="/src/assets/bubble.png" alt="About Me" /><span>About Me</span></div>
-                <div className="icon-item" onClick={() => handlePanelClick('mechanical')}><img src="/src/assets/gear.png" alt="Mechanical" /><span>Mechanical</span></div>
-                <div className="icon-item" onClick={() => handlePanelClick('electrical')}><img src="/src/assets/lightbulb.png" alt="Electrical" /><span>Electrical</span></div>
-                <div className="icon-item" onClick={() => handlePanelClick('software')}><img src="/src/assets/monitor.png" alt="Software" /><span>Software</span></div>
+                <div
+                  className="icon-item"
+                  onClick={() => handlePanelClick('about')}
+                >
+                  <img src="/src/assets/bubble.png" alt="About Me" />
+                  <span>About Me</span>
+                </div>
+                <div
+                  className="icon-item"
+                  onClick={() => handlePanelClick('mechanical')}
+                >
+                  <img src="/src/assets/gear.png" alt="Mechanical" />
+                  <span>Mechanical</span>
+                </div>
+                <div
+                  className="icon-item"
+                  onClick={() => handlePanelClick('electrical')}
+                >
+                  <img src="/src/assets/lightbulb.png" alt="Electrical" />
+                  <span>Electrical</span>
+                </div>
+                <div
+                  className="icon-item"
+                  onClick={() => handlePanelClick('software')}
+                >
+                  <img src="/src/assets/monitor.png" alt="Software" />
+                  <span>Software</span>
+                </div>
               </div>
             </div>
           </div>
@@ -129,37 +177,76 @@ function App() {
 
       {activePanel && (
         <div className={`panel-overlay ${isExiting ? 'slide-down' : 'slide-up'}`}>
-          <button className="back-button" onClick={handleBackClick}>Back to Home</button>
+          <button className="back-button" onClick={handleBackClick}>
+            Back to Home
+          </button>
+
           <div className="panel-collage" ref={collageRef}>
+            {/* About Me Slider */}
             <div className="panel-section">
               <h2>About Me</h2>
-              <div className="panel-strip">
-                {renderImage("/src/assets/1.png", "Who Am I?", "about")}
-                {renderImage("/src/assets/2.png", "Music", "music")}
-              </div>
+              <Swiper
+                modules={[Navigation, Pagination, EffectFade, A11y]}
+                navigation
+                pagination={{ clickable: true }}
+                loop
+                effect="fade"
+                speed={600}
+                className="about-slider"
+                style={{ width: '90%', maxWidth: 800, margin: '1rem auto' }}
+                a11y={{
+                  prevSlideMessage: 'Previous slide',
+                  nextSlideMessage: 'Next slide'
+                }}
+              >
+                <SwiperSlide>
+                  <div className="slide-content">
+                    {renderImage('/src/assets/1.png', 'Who Am I?', 'about')}
+                  </div>
+                </SwiperSlide>
+                <SwiperSlide>
+                  <div className="slide-content">
+                    {renderImage('/src/assets/2.png', 'Music', 'music')}
+                  </div>
+                </SwiperSlide>
+              </Swiper>
             </div>
+
+            {/* Mechanical */}
             <div className="panel-section">
               <h2>Mechanical</h2>
               <div className="panel-strip">
-                {renderImage("/src/assets/3.jpg", "Baja Offroading", "baja")}
-                {renderImage("/src/assets/4.png", "Skygauge Mechanical", "skygauge")}
-                {renderImage("/src/assets/5.jpg", "Planetary Gearset", "planetary-gearset")}
-                {renderImage("/src/assets/6.png", "Straumbeest", "straumbeest")}
+                {renderImage('/src/assets/3.jpg', 'Baja Offroading', 'baja')}
+                {renderImage('/src/assets/4.png', 'Skygauge Mechanical', 'skygauge')}
+                {renderImage(
+                  '/src/assets/5.jpg',
+                  'Planetary Gearset',
+                  'planetary-gearset'
+                )}
+                {renderImage('/src/assets/6.png', 'Straumbeest', 'straumbeest')}
               </div>
             </div>
+
+            {/* Electrical */}
             <div className="panel-section">
               <h2>Electrical</h2>
               <div className="panel-strip">
-                {renderImage("/src/assets/7.png", "RC Car", "rc-car")}
-                {renderImage("/src/assets/8.jpg", "Joystick Tester", "joystick-tester")}
+                {renderImage('/src/assets/7.png', 'RC Car', 'rc-car')}
+                {renderImage('/src/assets/8.jpg', 'Joystick Tester', 'joystick-tester')}
               </div>
             </div>
+
+            {/* Software */}
             <div className="panel-section">
               <h2>Software</h2>
               <div className="panel-strip">
-                {renderImage("/src/assets/9.png", "PokeAI", "pokeai")}
-                {renderImage("/src/assets/10.jpeg", "ROS Car", "ros-car")}
-                {renderImage("/src/assets/11.png", "Hackathon", "hackathon")}
+                {renderImage('/src/assets/9.png', 'PokeAI', 'pokeai')}
+                {renderImage(
+                  '/src/assets/10.jpeg',
+                  'ROS Car',
+                  'ros-car'
+                )}
+                {renderImage('/src/assets/11.png', 'Hackathon', 'hackathon')}
               </div>
             </div>
           </div>
