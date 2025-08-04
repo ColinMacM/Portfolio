@@ -1,8 +1,7 @@
-// src/App.jsx
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, EffectFade, A11y } from 'swiper';
+import { Navigation, Pagination, EffectFade } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -28,6 +27,7 @@ function App() {
 
     const handleScroll = () => {
       const frames = collage.querySelectorAll('.parallax-frame');
+
       frames.forEach((frame) => {
         const rect = frame.getBoundingClientRect();
         const offsetX = rect.left + frame.offsetWidth / 2 - window.innerWidth / 2;
@@ -52,7 +52,7 @@ function App() {
       about: 0,
       mechanical: sectionWidth,
       electrical: sectionWidth * 2,
-      software: sectionWidth * 3
+      software: sectionWidth * 3,
     }[panel];
 
     const duration = 800;
@@ -116,12 +116,12 @@ function App() {
       </svg>
 
       <div className="gradients-container">
-        <div className="g1" />
-        <div className="g2" />
-        <div className="g3" />
-        <div className="g4" />
-        <div className="g5" />
-        <div className="interactive" />
+        <div className="g1"></div>
+        <div className="g2"></div>
+        <div className="g3"></div>
+        <div className="g4"></div>
+        <div className="g5"></div>
+        <div className="interactive"></div>
       </div>
 
       {activePanel === null && (
@@ -135,37 +135,21 @@ function App() {
               <h2 className="subtitle">
                 Mechatronics Engineer who loves robotics, offroading, and AI
               </h2>
-              <img
-                className="bidoof"
-                src="/src/assets/bidoof.png"
-                alt="Bidoof"
-              />
+              <img className="bidoof" src="/src/assets/bidoof.png" alt="Bidoof" />
               <div className="icon-row">
-                <div
-                  className="icon-item"
-                  onClick={() => handlePanelClick('about')}
-                >
+                <div className="icon-item" onClick={() => handlePanelClick('about')}>
                   <img src="/src/assets/bubble.png" alt="About Me" />
                   <span>About Me</span>
                 </div>
-                <div
-                  className="icon-item"
-                  onClick={() => handlePanelClick('mechanical')}
-                >
+                <div className="icon-item" onClick={() => handlePanelClick('mechanical')}>
                   <img src="/src/assets/gear.png" alt="Mechanical" />
                   <span>Mechanical</span>
                 </div>
-                <div
-                  className="icon-item"
-                  onClick={() => handlePanelClick('electrical')}
-                >
+                <div className="icon-item" onClick={() => handlePanelClick('electrical')}>
                   <img src="/src/assets/lightbulb.png" alt="Electrical" />
                   <span>Electrical</span>
                 </div>
-                <div
-                  className="icon-item"
-                  onClick={() => handlePanelClick('software')}
-                >
+                <div className="icon-item" onClick={() => handlePanelClick('software')}>
                   <img src="/src/assets/monitor.png" alt="Software" />
                   <span>Software</span>
                 </div>
@@ -177,16 +161,13 @@ function App() {
 
       {activePanel && (
         <div className={`panel-overlay ${isExiting ? 'slide-down' : 'slide-up'}`}>
-          <button className="back-button" onClick={handleBackClick}>
-            Back to Home
-          </button>
-
+          <button className="back-button" onClick={handleBackClick}>Back to Home</button>
           <div className="panel-collage" ref={collageRef}>
-            {/* About Me Slider */}
+            {/* About Me section with Swiper */}
             <div className="panel-section">
               <h2>About Me</h2>
               <Swiper
-                modules={[Navigation, Pagination, EffectFade, A11y]}
+                modules={[Navigation, Pagination, EffectFade]}
                 navigation
                 pagination={{ clickable: true }}
                 loop
@@ -194,59 +175,44 @@ function App() {
                 speed={600}
                 className="about-slider"
                 style={{ width: '90%', maxWidth: 800, margin: '1rem auto' }}
-                a11y={{
-                  prevSlideMessage: 'Previous slide',
-                  nextSlideMessage: 'Next slide'
-                }}
               >
                 <SwiperSlide>
                   <div className="slide-content">
-                    {renderImage('/src/assets/1.png', 'Who Am I?', 'about')}
+                    {renderImage("/src/assets/1.png", "Who Am I?", "about")}
                   </div>
                 </SwiperSlide>
                 <SwiperSlide>
                   <div className="slide-content">
-                    {renderImage('/src/assets/2.png', 'Music', 'music')}
+                    {renderImage("/src/assets/2.png", "Music", "music")}
                   </div>
                 </SwiperSlide>
               </Swiper>
             </div>
 
-            {/* Mechanical */}
             <div className="panel-section">
               <h2>Mechanical</h2>
               <div className="panel-strip">
-                {renderImage('/src/assets/3.jpg', 'Baja Offroading', 'baja')}
-                {renderImage('/src/assets/4.png', 'Skygauge Mechanical', 'skygauge')}
-                {renderImage(
-                  '/src/assets/5.jpg',
-                  'Planetary Gearset',
-                  'planetary-gearset'
-                )}
-                {renderImage('/src/assets/6.png', 'Straumbeest', 'straumbeest')}
+                {renderImage("/src/assets/3.jpg", "Baja Offroading", "baja")}
+                {renderImage("/src/assets/4.png", "Skygauge Mechanical", "skygauge")}
+                {renderImage("/src/assets/5.jpg", "Planetary Gearset", "planetary-gearset")}
+                {renderImage("/src/assets/6.png", "Straumbeest", "straumbeest")}
               </div>
             </div>
 
-            {/* Electrical */}
             <div className="panel-section">
               <h2>Electrical</h2>
               <div className="panel-strip">
-                {renderImage('/src/assets/7.png', 'RC Car', 'rc-car')}
-                {renderImage('/src/assets/8.jpg', 'Joystick Tester', 'joystick-tester')}
+                {renderImage("/src/assets/7.png", "RC Car", "rc-car")}
+                {renderImage("/src/assets/8.jpg", "Joystick Tester", "joystick-tester")}
               </div>
             </div>
 
-            {/* Software */}
             <div className="panel-section">
               <h2>Software</h2>
               <div className="panel-strip">
-                {renderImage('/src/assets/9.png', 'PokeAI', 'pokeai')}
-                {renderImage(
-                  '/src/assets/10.jpeg',
-                  'ROS Car',
-                  'ros-car'
-                )}
-                {renderImage('/src/assets/11.png', 'Hackathon', 'hackathon')}
+                {renderImage("/src/assets/9.png", "PokeAI", "pokeai")}
+                {renderImage("/src/assets/10.jpeg", "ROS Car", "ros-car")}
+                {renderImage("/src/assets/11.png", "Hackathon", "hackathon")}
               </div>
             </div>
           </div>
