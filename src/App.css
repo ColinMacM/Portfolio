@@ -202,6 +202,9 @@ html, body {
   scroll-snap-type: x mandatory;
   justify-content: center; align-items: center;
   max-width: 100vw;
+  touch-action: pan-x;
+  overscroll-behavior-inline: contain; /* prevent scroll chaining to parent */
+  overscroll-behavior: contain;        
 }
 .panel-strip::-webkit-scrollbar { display: none; }
 
@@ -244,3 +247,43 @@ html, body {
 /* Slide animations */
 @keyframes slideUp   { from { transform: translateY(100%); } to { transform: translateY(0); } }
 @keyframes slideDown { from { transform: translateY(0); }   to { transform: translateY(100%); } }
+
+
+.nav-arrows {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;         /* let clicks pass through except on buttons */
+  z-index: 1000;
+}
+
+.arrow {
+  pointer-events: auto;         /* clickable */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.9);
+  color: #000;
+  font-size: 28px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  transition: transform .15s ease, background .15s ease, opacity .2s ease;
+  user-select: none;
+}
+
+.arrow.left  { left: 16px; }
+.arrow.right { right: 16px; }
+
+.arrow:hover { transform: translateY(-50%) scale(1.08); }
+.arrow:active { transform: translateY(-50%) scale(0.98); }
+
+/* Reduce visual noise on very small screens */
+@media (max-width: 640px) {
+  .arrow { opacity: 0.85; }
+}

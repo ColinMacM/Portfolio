@@ -1,6 +1,6 @@
 // src/components/Straumbeest.jsx
 import { useEffect, useRef } from 'react';
-import { createStraumbeestViewer } from '../utils/straumbeestViewer';
+import { createStraumbeestViewer } from "../../utils/straumbeestViewer";
 // import './Straumbeest.css';  // your styles
 
 export default function Straumbeest() {
