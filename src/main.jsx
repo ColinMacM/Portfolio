@@ -7,13 +7,13 @@ import Straumbeest from './components/projects/Straumbeest.jsx';
 import Baja from './components/projects/Baja.jsx';
 import Music from './components/projects/Music.jsx';
 import PokeAI from './components/projects/PokeAI.jsx';
-import ROSCar from './components/projects/ROSCar.jsx';
-import Hackathon from './components/projects/Hackathon.jsx';
-import JoystickTester from './components/projects/JoystickTester.jsx';
-import RCCar from './components/projects/RCCar.jsx';
-import PlanetaryGearset from './components/projects/PlanetaryGearset.jsx';
-import Skygauge from './components/projects/Skygauge.jsx';
-import About from './components/projects/About.jsx';
+// import ROSCar from './components/projects/ROSCar.jsx';
+// import Hackathon from './components/projects/Hackathon.jsx';
+// import JoystickTester from './components/projects/JoystickTester.jsx';
+// import RCCar from './components/projects/RCCar.jsx';
+// import PlanetaryGearset from './components/projects/PlanetaryGearset.jsx';
+// import Skygauge from './components/projects/Skygauge.jsx';
+// import About from './components/projects/About.jsx';
 
 import './index.css';
 
