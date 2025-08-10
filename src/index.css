@@ -1,4 +1,5 @@
-/* src/App.css */
+/* index.css */
+@import "tailwindcss";
 
 body, html, #root {
   margin: 0;
