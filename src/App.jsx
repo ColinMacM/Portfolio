@@ -1,46 +1,48 @@
 // src/App.jsx
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import './App.css';
 
-const WHEEL_COOLDOWN_MS = 500;
+const WHEEL_COOLDOWN_MS = 2000;
+const MUSIC_URL = 'https://musescore.com/user/30634848/sets';
+const OVERLAY_ANIM_MS = 700;
+const OVERLAY_DEFAULT_PANEL = 'about';
 
-// ---- Project data (sections + images) ---------------------------------------
+// ---- Project data (all assets must live in /public/assets) ------------------
 const SECTIONS = [
   {
     key: 'about',
     title: 'About Me',
     items: [
-      { src: '/src/assets/1.png', title: 'Who Am I?', slug: 'about' },
-      { src: '/src/assets/2.png', title: 'Music', slug: 'music' },
+      { src: '/assets/1.png', title: 'Who Am I?', slug: 'about' },
+      { src: '/assets/2.png', title: 'Music', slug: 'music' }, // stays in collage
     ],
   },
   {
     key: 'mechanical',
     title: 'Mechanical',
     items: [
-      { src: '/src/assets/3.jpg', title: 'Baja Offroading', slug: 'baja' },
-      { src: '/src/assets/4.png', title: 'Skygauge Mechanical', slug: 'skygauge' },
-      { src: '/src/assets/5.jpg', title: 'Planetary Gearset', slug: 'planetary-gearset' },
-      { src: '/src/assets/6.png', title: 'Straumbeest', slug: 'straumbeest' },
+      { src: '/assets/3.jpg', title: 'Baja Offroading', slug: 'baja' },
+      { src: '/assets/4.png', title: 'Skygauge Mechanical', slug: 'skygauge' },
+      { src: '/assets/5.jpg', title: 'Planetary Gearset', slug: 'planetary-gearset' },
     ],
   },
   {
     key: 'electrical',
     title: 'Electrical',
     items: [
-      { src: '/src/assets/7.png', title: 'RC Car', slug: 'rc-car' },
-      { src: '/src/assets/8.jpg', title: 'Joystick Tester', slug: 'joystick-tester' },
+      { src: '/assets/7.png', title: 'RC Car', slug: 'rc-car' },
+      { src: '/assets/8.jpg', title: 'Keyboard', slug: 'keyboard' }, // ← fixed case
     ],
   },
   {
     key: 'software',
     title: 'Software',
     items: [
-      { src: '/src/assets/9.png', title: 'PokeAI', slug: 'pokeai' },
-      { src: '/src/assets/10.jpeg', title: 'ROS Car', slug: 'ros-car' },
-      { src: '/src/assets/11.png', title: 'Hackathon', slug: 'hackathon' },
+      { src: '/assets/9.png', title: 'Drone-Assisted Gaussian Splatting', slug: 'drone-assisted-gaussian-splatting' },
+      { src: '/assets/10.png', title: 'ROS Car', slug: 'ros-car' },
+      { src: '/assets/11.png', title: 'Horse Hearse', slug: 'horse-hearse' },
     ],
   },
 ];
@@ -48,14 +50,16 @@ const SECTIONS = [
 const SECTION_NAMES = SECTIONS.map(s => s.key);
 
 function App() {
-  const [activePanel, setActivePanel] = useState(null);        // null | 'about' | 'mechanical' | ...
+  const [activePanel, setActivePanel] = useState(null);
   const [isExiting, setIsExiting] = useState(false);
-  const [focus, setFocus] = useState(null);                    // null | { src, title, slug, section }
+  const [focus, setFocus] = useState(null);
   const collageRef = useRef(null);
+  const overlayRef = useRef(null);
   const lastWheelTime = useRef(0);
+  const pendingPanelRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Flattened list for the bottom thumbnails in the focus overlay
   const ALL_ITEMS = useMemo(() => {
     const arr = [];
     for (const sec of SECTIONS) {
@@ -64,19 +68,68 @@ function App() {
     return arr;
   }, []);
 
-  // 1) Prevent body scroll when panel is open
+  // Deep-link handling --------------------------------------------------------
+  useEffect(() => {
+    const state = location.state || {};
+    const openPanel = state.openPanel;
+    const openItem = state.openItem;
+
+    if (openPanel && SECTION_NAMES.includes(openPanel)) {
+      pendingPanelRef.current = { panel: openPanel, item: openItem || null };
+      setActivePanel(OVERLAY_DEFAULT_PANEL);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location, navigate]);
+
+  useEffect(() => {
+    if (!activePanel || !pendingPanelRef.current) return;
+    const overlayEl = overlayRef.current;
+    if (!overlayEl) return;
+
+    let done = false;
+    const { panel, item } = pendingPanelRef.current;
+
+    const tryScrollToTarget = () => {
+      if (done) return;
+      const collage = collageRef.current;
+      const el = collage?.querySelector(`[data-panel-key="${panel}"]`);
+      if (el && el.offsetWidth > 0) {
+        done = true;
+        collage.scrollTo({ left: el.offsetLeft, behavior: 'smooth' });
+        setActivePanel(panel);
+        if (item) {
+          const sec = SECTIONS.find(s => s.key === panel);
+          const found = sec?.items.find(it => it.slug === item);
+          if (found) setFocus({ ...found, section: panel });
+        }
+        pendingPanelRef.current = null;
+      } else {
+        requestAnimationFrame(tryScrollToTarget);
+      }
+    };
+
+    const onOverlayShown = () => requestAnimationFrame(tryScrollToTarget);
+
+    overlayEl.addEventListener('animationend', onOverlayShown, { once: true });
+    overlayEl.addEventListener('transitionend', onOverlayShown, { once: true });
+    const fallback = setTimeout(onOverlayShown, OVERLAY_ANIM_MS + 50);
+    return () => {
+      overlayEl.removeEventListener('animationend', onOverlayShown);
+      overlayEl.removeEventListener('transitionend', onOverlayShown);
+      clearTimeout(fallback);
+    };
+  }, [activePanel]);
+
+  // Housekeeping --------------------------------------------------------------
   useEffect(() => {
     document.body.style.overflow = activePanel ? 'hidden' : 'auto';
     return () => { document.body.style.overflow = 'auto'; };
   }, [activePanel]);
 
-  // 2) Parallax effect + manual drag scroll listener
   useEffect(() => {
     const collage = collageRef.current;
     if (!collage) return;
-
     const handleScroll = () => {
-      // Parallax on each frame image (small shift)
       collage.querySelectorAll('.parallax-frame').forEach(frame => {
         const rect = frame.getBoundingClientRect();
         const offsetX = rect.left + frame.offsetWidth / 2 - window.innerWidth / 2;
@@ -86,31 +139,28 @@ function App() {
           img.style.transform = `translateX(${shift}px)`;
         }
       });
-
-      // If user drags scrollbar, update activePanel
-      const sectionWidth = collage.scrollWidth / SECTION_NAMES.length;
-      const idx = Math.round(collage.scrollLeft / sectionWidth);
-      const newPanel = SECTION_NAMES[idx];
-      if (newPanel && newPanel !== activePanel) {
-        setActivePanel(newPanel);
-      }
+      const sections = Array.from(collage.querySelectorAll('[data-panel-key]'));
+      const scrollLeft = collage.scrollLeft;
+      let nearestKey = null, nearestDist = Infinity;
+      sections.forEach(el => {
+        const dist = Math.abs(el.offsetLeft - scrollLeft);
+        if (dist < nearestDist) { nearestDist = dist; nearestKey = el.getAttribute('data-panel-key'); }
+      });
+      if (nearestKey && nearestKey !== activePanel) setActivePanel(nearestKey);
     };
-
     collage.addEventListener('scroll', handleScroll);
     handleScroll();
     return () => collage.removeEventListener('scroll', handleScroll);
   }, [activePanel]);
 
-  // 3) Smooth scroll to a panel
   const scrollToSection = useCallback((panel) => {
     const collage = collageRef.current;
     if (!collage) return;
-    const sectionWidth = collage.scrollWidth / SECTION_NAMES.length;
-    const left = sectionWidth * SECTION_NAMES.indexOf(panel);
+    const el = collage.querySelector(`[data-panel-key="${panel}"]`);
+    const left = el ? el.offsetLeft : (collage.scrollWidth / SECTION_NAMES.length) * SECTION_NAMES.indexOf(panel);
     collage.scrollTo({ left, behavior: 'smooth' });
   }, []);
 
-  // Navigate by +/- 1 section
   const stepSection = useCallback((offset) => {
     if (!activePanel) return;
     const currIdx = SECTION_NAMES.indexOf(activePanel);
@@ -122,19 +172,13 @@ function App() {
     }
   }, [activePanel, scrollToSection]);
 
-  // 4) Wheel handler: snap to next/prev panel
   const handleWheelSnap = useCallback((e) => {
     if (!activePanel) return;
-    if (focus) return; // while overlay is open, ignore snaps
-
-    // Let inner strips (videos/images) handle their own scrolling
+    if (focus) return;
     if (e.target instanceof Element && e.target.closest('.panel-strip')) return;
-
-    // Let primarily horizontal gestures scroll natively
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
 
-    e.preventDefault(); // only block native scroll for the big collage snap
-
+    e.preventDefault();
     const now = Date.now();
     if (now - lastWheelTime.current < WHEEL_COOLDOWN_MS) return;
     lastWheelTime.current = now;
@@ -143,23 +187,20 @@ function App() {
     const currIdx = SECTION_NAMES.indexOf(activePanel);
     const nextIdx = Math.max(0, Math.min(SECTION_NAMES.length - 1, currIdx + dir));
     const nextPanel = SECTION_NAMES[nextIdx];
-
     if (nextPanel !== activePanel) {
       setActivePanel(nextPanel);
       scrollToSection(nextPanel);
     }
   }, [activePanel, focus, scrollToSection]);
 
-  // 5) Attach non-passive wheel listener so preventDefault() works
   useEffect(() => {
     const el = collageRef.current;
-    if (!el || !activePanel || focus) return; // don't bind when overlay is open
+    if (!el || !activePanel || focus) return;
     const opts = { passive: false };
     el.addEventListener('wheel', handleWheelSnap, opts);
     return () => el.removeEventListener('wheel', handleWheelSnap, opts);
   }, [activePanel, focus, handleWheelSnap]);
 
-  // 6) Arrow keys: when collage visible (no overlay), step sections
   useEffect(() => {
     if (!activePanel || focus) return;
     const onKey = (e) => {
@@ -170,26 +211,20 @@ function App() {
     return () => window.removeEventListener('keydown', onKey);
   }, [activePanel, focus, stepSection]);
 
-  // 6b) Overlay keyboard: any arrow or Escape closes overlay
   useEffect(() => {
     if (!focus) return;
     const onKey = (e) => {
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Escape') {
-        setFocus(null);
-      }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'Escape') setFocus(null);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [focus]);
 
-  // Icons open panels
   const handlePanelClick = (panel) => {
     setActivePanel(panel);
-    // wait for slide-up animation
-    setTimeout(() => scrollToSection(panel), 700);
+    setTimeout(() => scrollToSection(panel), OVERLAY_ANIM_MS);
   };
 
-  // Back to home
   const handleBackClick = () => {
     setIsExiting(true);
     setTimeout(() => {
@@ -198,26 +233,36 @@ function App() {
     }, 600);
   };
 
-  // Small card -> focus overlay trigger
-  const openFocus = (item, sectionKey) => {
+  const openItem = (item, sectionKey) => {
     setFocus({ ...item, section: sectionKey });
   };
 
-  // Helper to render each image frame (uses shared layoutId for Motion zoom)
-  const renderImage = (item, sectionKey) => (
-    <motion.div
-      className="parallax-frame"
-      key={`${item.src}-${item.title}`}
-      layoutId={`frame-${item.slug}`}
-      onClick={() => openFocus(item, sectionKey)}
-      style={{ cursor: 'pointer' }}
-    >
-      <div className="parallax-inner">
-        <img src={item.src} alt={item.title} draggable="false" />
-      </div>
-      <div className="frame-title">{item.title}</div>
-    </motion.div>
-  );
+  // Better affordance (pointer + keyboard)
+  const renderImage = (item, sectionKey) => {
+    const onTileKeyDown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openItem(item, sectionKey);
+      }
+    };
+    return (
+      <motion.div
+        className="parallax-frame tile"
+        key={`${item.src}-${item.title}`}
+        layoutId={`frame-${item.slug}`}
+        onClick={() => openItem(item, sectionKey)}
+        onKeyDown={onTileKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-label={`Open ${item.title}`}
+      >
+        <div className="parallax-inner">
+          <img src={item.src} alt={item.title} draggable="false" />
+        </div>
+        <div className="frame-title clickable">{item.title}</div>
+      </motion.div>
+    );
+  };
 
   return (
     <div className="gradient-bg">
@@ -249,26 +294,24 @@ function App() {
           <div className="app">
             <div className="content-box">
               <div className="internal-tab">home</div>
-              <h1 className="main-title">
-                hey, <span className="highlight">i’m colin!</span>
-              </h1>
+              <h1 className="main-title">hey, <span className="highlight">i’m colin!</span></h1>
               <h2 className="subtitle">Mechatronics Engineer who loves robotics, offroading, and AI</h2>
-              <img className="bidoof" src="/src/assets/bidoof.png" alt="Bidoof" />
+              <img className="bidoof" src="/assets/bidoof.png" alt="Bidoof" />
               <div className="icon-row">
                 <div className="icon-item" onClick={() => handlePanelClick('about')}>
-                  <img src="/src/assets/bubble.png" alt="About Me" />
+                  <img src="/assets/bubble.png" alt="About Me" />
                   <span>About Me</span>
                 </div>
                 <div className="icon-item" onClick={() => handlePanelClick('mechanical')}>
-                  <img src="/src/assets/gear.png" alt="Mechanical" />
+                  <img src="/assets/gear.png" alt="Mechanical" />
                   <span>Mechanical</span>
                 </div>
                 <div className="icon-item" onClick={() => handlePanelClick('electrical')}>
-                  <img src="/src/assets/lightbulb.png" alt="Electrical" />
+                  <img src="/assets/lightbulb.png" alt="Electrical" />
                   <span>Electrical</span>
                 </div>
                 <div className="icon-item" onClick={() => handlePanelClick('software')}>
-                  <img src="/src/assets/monitor.png" alt="Software" />
+                  <img src="/assets/monitor.png" alt="Software" />
                   <span>Software</span>
                 </div>
               </div>
@@ -279,20 +322,18 @@ function App() {
 
       {/* Panel overlay + collage */}
       {activePanel && (
-        <div className={`panel-overlay ${isExiting ? 'slide-down' : 'slide-up'}`}>
-          <button className="back-button" onClick={handleBackClick}>
-            Back to Home
-          </button>
+        <div ref={overlayRef} className={`panel-overlay ${isExiting ? 'slide-down' : 'slide-up'}`}>
+          <button className="back-button" onClick={handleBackClick}>Back to Home</button>
 
-          {/* Left/Right arrows to snap sections */}
+          {/* Left/Right arrows */}
           <div className="nav-arrows" aria-hidden="false">
             <button className="arrow left" onClick={() => stepSection(-1)} aria-label="Previous section">‹</button>
             <button className="arrow right" onClick={() => stepSection(1)} aria-label="Next section">›</button>
           </div>
 
-          <div className="panel-collage" ref={collageRef}>
+          <div className="panel-collage" ref={collageRef} id="projects">
             {SECTIONS.map(sec => (
-              <div key={sec.key} className="panel-section">
+              <div key={sec.key} className="panel-section" data-panel-key={sec.key}>
                 <h2>{sec.title}</h2>
                 <div className="panel-strip" onWheel={(e) => e.stopPropagation()}>
                   {sec.items.map(item => renderImage(item, sec.key))}
@@ -301,7 +342,7 @@ function App() {
             ))}
           </div>
 
-          {/* Focus overlay (giant photo + title + bottom thumbnails) */}
+          {/* Focus overlay */}
           <AnimatePresence>
             {focus && (
               <motion.div
@@ -310,7 +351,6 @@ function App() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                {/* Big image area */}
                 <div className="relative flex-1 flex items-center justify-center px-4">
                   <motion.div
                     layoutId={`frame-${focus.slug}`}
@@ -324,11 +364,16 @@ function App() {
                     />
                   </motion.div>
 
-                  {/* Center clickable title → navigate to project */}
                   <motion.button
-                    className="absolute inset-x-0 mx-auto text-white text-4xl md:text-6xl font-semibold leading-tight text-center px-4"
+                    className="focus-title absolute inset-x-0 mx-auto text-white text-4xl md:text-6xl font-semibold leading-tight text-center px-4"
                     style={{ top: '50%', transform: 'translateY(-50%)' }}
-                    onClick={() => navigate(`/project/${focus.slug}`)}
+                    onClick={() => {
+                      if (focus.slug === 'music') {
+                        window.open(MUSIC_URL, '_blank', 'noopener,noreferrer');
+                      } else {
+                        navigate(`/project/${focus.slug}`);
+                      }
+                    }}
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.35 }}
@@ -336,7 +381,6 @@ function App() {
                     {focus.title}
                   </motion.button>
 
-                  {/* Close hit area (optional click anywhere dark to close) */}
                   <button
                     className="absolute top-4 right-4 text-white/80 hover:text-white text-xl px-3 py-1 rounded-md bg-white/10"
                     onClick={() => setFocus(null)}
@@ -352,10 +396,16 @@ function App() {
                     {ALL_ITEMS.map(item => (
                       <button
                         key={item.slug}
-                        className={`overflow-hidden rounded-md shrink-0 ${
-                          item.slug === focus.slug ? 'ring-2 ring-white' : 'ring-1 ring-white/20'
+                        className={`thumb-btn overflow-hidden rounded-md shrink-0 ${
+                          item.slug === focus?.slug ? 'ring-2 ring-white' : 'ring-1 ring-white/20'
                         }`}
-                        onClick={() => setFocus(item)}
+                        onClick={() => {
+                          if (item.slug === 'music') {
+                            window.open(MUSIC_URL, '_blank', 'noopener,noreferrer');
+                          } else {
+                            setFocus(item);
+                          }
+                        }}
                         aria-label={item.title}
                         title={item.title}
                         style={{ width: '120px', height: '72px' }}
@@ -375,3 +425,4 @@ function App() {
 }
 
 export default App;
+

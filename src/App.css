@@ -336,3 +336,44 @@ html, body {
 .swiper-pagination-bullet-active {
   background: #fff;
 }
+
+/* Make tiles clearly clickable */
+.tile { cursor: pointer; }
+.tile .frame-title {
+  transition: color .18s ease, text-shadow .18s ease, transform .18s ease, opacity .18s ease;
+  color: rgba(255,255,255,.9);
+}
+.tile:hover .frame-title,
+.tile:focus-visible .frame-title,
+.tile:focus .frame-title {
+  color: #ffb44c; /* warm orange */
+  text-shadow: 0 0 14px rgba(255,180,76,.55);
+  transform: translateY(-2px);
+}
+
+/* Also show a focus ring when tabbing */
+.tile:focus-visible {
+  outline: 2px solid #ffb44c;
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+
+/* Bottom thumbnails feel clickable */
+.thumb-btn {
+  cursor: pointer;
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease, outline .18s ease;
+}
+.thumb-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 0 0 2px rgba(255,255,255,.9);
+}
+.thumb-btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(255,180,76,.95);
+}
+
+/* Big centered title in focus overlay looks clickable */
+.focus-title { cursor: pointer; }
+.focus-title:hover {
+  text-shadow: 0 0 18px rgba(255,255,255,.45);
+}
