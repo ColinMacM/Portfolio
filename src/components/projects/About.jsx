@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FiDownload, FiAward, FiCpu, FiTool, FiMusic, FiBookOpen } from "react-icons/fi";
+import TakeMeBack from "../TakeMeBack.jsx";
 
 // ---------- Assets (place these files under src/assets/) ----------
 // Adjust paths if this file lives elsewhere.
@@ -64,6 +65,7 @@ function Section({ children, className = "" }) {
 export default function About() {
   return (
     <div className="min-h-screen bg-black text-white">
+      <TakeMeBack defaultPanel="about" />
       {/* background flair at the very top (matches gradient/black vibe) */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black via-black to-transparent" />
 

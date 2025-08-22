@@ -2,6 +2,7 @@
 import React, { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
+import TakeMeBack from "../TakeMeBack.jsx";
 import {
   FiAward,
   FiUsers,
@@ -17,7 +18,7 @@ const BajaCover = "/assets/Baja.JPG";
 
 const IceBaja = "/assets/IceBaja.mp4";
 const MichiganPhoto = "/assets/3.jpg";
-const BajaFall = "/assets/BajaFall.jpg";
+const BajaFall = "/assets/BajaFall.JPG";
 
 const SplineGen = "/assets/splineGen.png";
 const CouplerWorks = "/assets/couplerWorks.png";
@@ -102,6 +103,7 @@ function Section({ children, className = "" }) {
 export default function Baja() {
   return (
     <div className="min-h-screen bg-black text-white">
+      <TakeMeBack defaultPanel="mechanical" />
       {/* top flair */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black via-black to-transparent" />
 

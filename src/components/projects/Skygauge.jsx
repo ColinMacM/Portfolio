@@ -3,6 +3,7 @@ import React, { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FiGitBranch } from "react-icons/fi";
+import TakeMeBack from "../TakeMeBack.jsx";
 
 // ---------- Assets (place under src/assets/) ----------
 const DroneFlying = "/assets/droneflying.mp4";
@@ -77,6 +78,7 @@ function Section({ children, className = "" }) {
 export default function Skygauge() {
   return (
     <div className="min-h-screen bg-black text-white">
+      <TakeMeBack defaultPanel="mechanical" />
       {/* top flair */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black via-black to-transparent" />
 

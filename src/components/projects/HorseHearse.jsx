@@ -3,6 +3,7 @@ import React, { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FiGitBranch, FiGithub, FiMonitor, FiSmartphone, FiMap, FiExternalLink } from "react-icons/fi";
+import TakeMeBack from "../TakeMeBack.jsx";
 
 // ---- Assets (place these files in src/assets/) ----
 const HHGameplay = "/assets/hh-gameplay.mp4";
@@ -60,6 +61,7 @@ function Section({ children, className = "" }) {
 export default function HorseHearse() {
   return (
     <div className="min-h-screen bg-black text-white">
+      <TakeMeBack defaultPanel="mechanical" />
       {/* top flair */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black via-black to-transparent" />
 

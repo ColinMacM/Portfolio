@@ -3,6 +3,7 @@ import React, { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FiGitBranch } from "react-icons/fi";
+import TakeMeBack from "../TakeMeBack.jsx";
 
 // ---------- Assets ----------
 const RC01 = "/assets/rc-01.jpg";     // hero photo
@@ -49,6 +50,7 @@ function Reveal({
 function Section({ children, className = "" }) {
   return (
     <section className={`relative py-20 sm:py-28 ${className}`}>
+      <TakeMeBack defaultPanel="mechanical" />
       {/* subtle gradient divider above */}
       <div className="pointer-events-none absolute -top-6 left-0 right-0 h-6 bg-gradient-to-b from-transparent via-white/5 to-transparent opacity-30" />
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">{children}</div>
