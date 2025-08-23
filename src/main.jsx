@@ -1,4 +1,3 @@
-// src/main.jsx
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -11,8 +10,6 @@ import RCCar from "./components/projects/RCCar.jsx";
 import PlanetaryGearset from "./components/projects/PlanetaryGearset.jsx";
 import Skygauge from "./components/projects/Skygauge.jsx";
 import About from "./components/projects/About.jsx";
-
-// NEW/REPLACEMENTS
 import HorseHearse from "./components/projects/HorseHearse.jsx";
 import DroneAssistedGaussianSplatting from "./components/projects/DroneAssistedGaussianSplatting.jsx";
 

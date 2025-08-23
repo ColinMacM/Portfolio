@@ -116,16 +116,17 @@ const detectEnv = () => {
   const ua = navigator.userAgent;
   const isIOS = /iP(ad|hone|od)/i.test(ua);
   const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
-  return { isIOS, isSafari };
+  const isMobileUA = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+  return { isIOS, isSafari, isMobileUA };
 };
 
 /**
- * Compute per-breakpoint sizes and crop position.
- * We keep object-fit: cover (cropped), make tiles TALLER,
- * and bias the crop slightly upward so heads aren't chopped.
+ * Compute base sizes and crop position.
+ * Keeps object-fit: cover (cropped), makes tiles TALLER,
+ * and biases the crop slightly upward so heads aren't chopped.
  */
 const computeLayout = () => {
-  const { isSafari } = detectEnv();
+  const { isSafari, isMobileUA } = detectEnv();
   const w = Math.max(320, window.innerWidth || 1280);
 
   // breakpoints
@@ -137,19 +138,17 @@ const computeLayout = () => {
            : tablet ? Math.min(0.36 * w, 440)
            : Math.min(0.28 * w, 480);
 
-  // Safari tends to render a touch larger; nudge down a bit
   if (isSafari) tileW *= 0.92;
 
-  // TALLER aspect (height/width). Previously ~0.62 (landscape-ish).
-  // Now we go portrait-leaning for richer vertical composition.
+  // Portrait-leaning aspect ratios
   const aspectHOverW = mobile ? 1.05 : tablet ? 0.95 : 0.85;
   const tileH = Math.round(tileW * aspectHOverW);
 
-  // Thumbnails: also taller
+  // Thumbnails: taller as well
   const thumbW = mobile ? 90 : 120;
   const thumbH = Math.round(thumbW * 0.9);
 
-  // Upward crop bias (percent from top). Higher = show more upper content.
+  // Upward crop bias
   const cropY = mobile ? 42 : tablet ? 38 : 35;
 
   return {
@@ -158,9 +157,128 @@ const computeLayout = () => {
     thumbW: `${thumbW}px`,
     thumbH: `${thumbH}px`,
     gap: mobile ? '10px' : '14px',
-    cropY, // used in objectPosition
+    cropY,
+    isMobile: mobile || isMobileUA, // expose to render branch
   };
 };
+
+// -------------------- Mobile Home (vertical slide) ---------------------------
+function MobileHome({ onOpenPanel }) {
+  // Inline CSS so you don’t have to touch App.css
+  const vh = 'calc(var(--vh, 1vh) * 100)';
+  return (
+    <div
+      className="mobile-home-container"
+      style={{
+        position: 'relative',
+        height: vh,
+        overflowY: 'auto',
+        scrollSnapType: 'y mandatory',
+        WebkitOverflowScrolling: 'touch',
+        scrollBehavior: 'smooth',
+        background: 'linear-gradient(40deg, var(--color-bg1), var(--color-bg2))',
+      }}
+    >
+      <style>{`
+        .mobile-slide {
+          min-height: ${vh};
+          scroll-snap-align: start;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+          color: white;
+          text-align: center;
+        }
+        .mobile-card {
+          width: min(92vw, 540px);
+          background: rgba(0,0,0,0.4);
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 24px;
+          box-shadow: 0 10px 40px -10px rgba(0,0,0,0.6);
+          padding: 24px 20px;
+          backdrop-filter: blur(6px);
+        }
+        .mobile-card h1, .mobile-card h2 { margin: 0; }
+        .mobile-cta {
+          margin-top: 14px;
+          padding: 10px 16px;
+          border-radius: 12px;
+          background: rgba(255,255,255,0.12);
+          border: 1px solid rgba(255,255,255,0.18);
+          color: white;
+        }
+        .mobile-cta:active { transform: scale(0.98); }
+        .mobile-icon {
+          width: 64px; height: 64px; object-fit: contain; margin: 10px auto 4px; display: block;
+        }
+        .mobile-bidoof { width: 84px; height: 84px; object-fit: contain; margin: 12px auto 0; display:block; }
+        .hint { margin-top: 10px; font-size: 12px; opacity: 0.8; }
+      `}</style>
+
+      {/* Slide 1: Intro */}
+      <section className="mobile-slide">
+        <div className="mobile-card">
+          <div className="internal-tab">home</div>
+          <h1 className="main-title">hey, <span className="highlight">i’m colin!</span></h1>
+          <h2 className="subtitle">Mechatronics Engineer who loves robotics, offroading, and AI</h2>
+          <img className="mobile-bidoof" src="/assets/bidoof.png" alt="Bidoof" loading="eager" />
+          <div className="hint">Swipe up ↓</div>
+        </div>
+      </section>
+
+      {/* Slide 2: About */}
+      <section className="mobile-slide">
+        <div className="mobile-card">
+          <img className="mobile-icon" src="/assets/bubble.png" alt="About icon" />
+          <h2>About Me</h2>
+          <p style={{opacity:0.9, marginTop:8}}>Learn more about me and what I’m building.</p>
+          <button className="mobile-cta" onClick={() => onOpenPanel('about')}>Open About</button>
+        </div>
+      </section>
+
+      {/* Slide 3: Mechanical */}
+      <section className="mobile-slide">
+        <div className="mobile-card">
+          <img className="mobile-icon" src="/assets/gear.png" alt="Mechanical icon" />
+          <h2>Mechanical</h2>
+          <p style={{opacity:0.9, marginTop:8}}>Baja, Skygauge, mechanisms, CAD.</p>
+          <button className="mobile-cta" onClick={() => onOpenPanel('mechanical')}>Open Mechanical</button>
+        </div>
+      </section>
+
+      {/* Slide 4: Electrical */}
+      <section className="mobile-slide">
+        <div className="mobile-card">
+          <img className="mobile-icon" src="/assets/lightbulb.png" alt="Electrical icon" />
+          <h2>Electrical</h2>
+          <p style={{opacity:0.9, marginTop:8}}>RC, keyboard, boards, and wiring.</p>
+          <button className="mobile-cta" onClick={() => onOpenPanel('electrical')}>Open Electrical</button>
+        </div>
+      </section>
+
+      {/* Slide 5: Software */}
+      <section className="mobile-slide">
+        <div className="mobile-card">
+          <img className="mobile-icon" src="/assets/monitor.png" alt="Software icon" />
+          <h2>Software</h2>
+          <p style={{opacity:0.9, marginTop:8}}>ROS, splats, viewers, ML.</p>
+          <button className="mobile-cta" onClick={() => onOpenPanel('software')}>Open Software</button>
+          <div className="hint" style={{marginTop:12}}>
+            Or check out my music set —
+            <button
+              className="mobile-cta"
+              style={{ marginLeft: 8, padding: '6px 10px' }}
+              onClick={() => window.open(MUSIC_URL, '_blank', 'noopener,noreferrer')}
+            >
+              Music
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
 
 // ----------------------------------------------------------------------------
 
@@ -179,8 +297,63 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // responsive layout state
+  // responsive layout state (also exposes `isMobile`)
   const [layout, setLayout] = useState(() => computeLayout());
+
+  // ---- NEW: refs per section + per-section fit-size overrides ---------------
+  const sectionRefs = useRef({});
+  const [fitSizeBySection, setFitSizeBySection] = useState({}); // { [key]: {w,h} }
+
+  // recompute fit for any section with 3+ items when layout/container changes
+  useEffect(() => {
+    const computeAllFits = () => {
+      const baseW = parseInt(layout.tileW, 10);
+      const baseH = parseInt(layout.tileH, 10);
+      const gap = parseFloat(layout.gap) || 0;
+
+      const next = {};
+      for (const sec of SECTIONS) {
+        const n = sec.items.length;
+        const el = sectionRefs.current[sec.key];
+        const strip = el?.querySelector('.panel-strip');
+        if (!strip || !baseW || n < 3) continue; // only adjust sections with 3+ tiles
+
+        const stripW = strip.clientWidth;
+        const required = n * baseW + gap * (n - 1);
+
+        // scale uniformly if needed so all tiles + gaps fit
+        const scale = Math.max(0.5, Math.min(1, (stripW - gap * (n - 1)) / (n * baseW)));
+
+        if (scale < 1) {
+          const w = Math.floor(baseW * scale);
+          const h = Math.floor(baseH * scale);
+          next[sec.key] = { w: `${w}px`, h: `${h}px` };
+        }
+      }
+      setFitSizeBySection(next);
+    };
+
+    const ros = [];
+    // Observe each section container
+    SECTIONS.forEach(s => {
+      const node = sectionRefs.current[s.key];
+      if (!node) return;
+      const ro = new ResizeObserver(computeAllFits);
+      ro.observe(node);
+      ros.push(ro);
+    });
+
+    // Run once now and on window changes
+    computeAllFits();
+    window.addEventListener('resize', computeAllFits);
+    window.addEventListener('orientationchange', computeAllFits);
+
+    return () => {
+      ros.forEach(ro => ro.disconnect());
+      window.removeEventListener('resize', computeAllFits);
+      window.removeEventListener('orientationchange', computeAllFits);
+    };
+  }, [layout]);
 
   const ALL_ITEMS = useMemo(() => {
     const arr = [];
@@ -220,12 +393,14 @@ function App() {
   // Deep-link handling
   useEffect(() => {
     const state = location.state || {};
-    const openPanel = state.openPanel;
-    const openItem = state.openItem;
-    if (openPanel && SECTION_NAMES.includes(openPanel)) {
-      pendingPanelRef.current = { panel: openPanel, item: openItem || null };
-      setActivePanel(OVERLAY_DEFAULT_PANEL);
-      navigate(location.pathname, { replace: true, state: null });
+    the: {
+      const openPanel = state.openPanel;
+      const openItem = state.openItem;
+      if (openPanel && SECTION_NAMES.includes(openPanel)) {
+        pendingPanelRef.current = { panel: openPanel, item: openItem || null };
+        setActivePanel(OVERLAY_DEFAULT_PANEL);
+        navigate(location.pathname, { replace: true, state: null });
+      }
     }
   }, [location, navigate]);
 
@@ -382,7 +557,7 @@ function App() {
     setFocus({ ...item, section: sectionKey });
   };
 
-  // Responsive tile renderer (taller + biased crop)
+  // Responsive tile renderer (taller + biased crop) with per-section fit
   const renderImage = (item, sectionKey) => {
     const onTileKeyDown = (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -390,6 +565,12 @@ function App() {
         openItem(item, sectionKey);
       }
     };
+
+    // Use fitted size for sections with 3+ items when present; else base size
+    const size = fitSizeBySection[sectionKey]
+      ? fitSizeBySection[sectionKey]
+      : { w: layout.tileW, h: layout.tileH };
+
     return (
       <motion.div
         className="parallax-frame tile"
@@ -400,7 +581,7 @@ function App() {
         role="button"
         tabIndex={0}
         aria-label={`Open ${item.title}`}
-        style={{ width: layout.tileW, height: layout.tileH }}
+        style={{ width: size.w, height: size.h }}
       >
         <div className="parallax-inner" style={{ width: '100%', height: '100%' }}>
           <img
@@ -413,7 +594,6 @@ function App() {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              // <-- key change: slightly higher vertical focus across browsers
               objectPosition: `50% ${layout.cropY}%`,
               willChange: 'transform',
               backfaceVisibility: 'hidden',
@@ -428,6 +608,7 @@ function App() {
   };
 
   const pct = Math.max(0, Math.min(100, Math.round(progress * 100)));
+  const isMobile = layout.isMobile;
 
   return (
     <div className="gradient-bg">
@@ -443,7 +624,7 @@ function App() {
                     const a = (i * Math.PI * 2) / 12;
                     const x1 = 50 + Math.cos(a) * 28; const y1 = 50 + Math.sin(a) * 28;
                     const x2 = 50 + Math.cos(a) * 38; const y2 = 50 + Math.sin(a) * 38;
-                    return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} />;
+                    return <line key={i} x1={x1} y1={y1} x2={x2} />;
                   })}
                 </g>
               </svg>
@@ -454,7 +635,7 @@ function App() {
                     const a = (i * Math.PI * 2) / 10;
                     const x1 = 50 + Math.cos(a) * 22; const y1 = 50 + Math.sin(a) * 22;
                     const x2 = 50 + Math.cos(a) * 30; const y2 = 50 + Math.sin(a) * 30;
-                    return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} />;
+                    return <line key={i} x1={x1} y1={y1} x2={x2} />;
                   })}
                 </g>
               </svg>
@@ -476,36 +657,40 @@ function App() {
         </div>
       )}
 
-      {/* Home (interactive background replaces old gradient) */}
+      {/* Home: desktop/tablet = original, mobile = vertical slides */}
       {bootReady && activePanel === null && (
-        <InteractiveHomeBG>
-          <div className="text-container">     {/* <-- centers the card */}
-            <div className="content-box">
-              <div className="internal-tab">home</div>
-              <h1 className="main-title">hey, <span className="highlight">i’m colin!</span></h1>
-              <h2 className="subtitle">Mechatronics Engineer who loves robotics, offroading, and AI</h2>
-              <img className="bidoof" src="/assets/bidoof.png" alt="Bidoof" loading="eager" fetchPriority="high" />
-            <div className="icon-row">
-              <div className="icon-item" onClick={() => handlePanelClick('about')}>
-                <img src="/assets/bubble.png" alt="About Me" loading="eager" fetchPriority="high" />
-                <span>About Me</span>
-              </div>
-              <div className="icon-item" onClick={() => handlePanelClick('mechanical')}>
-                <img src="/assets/gear.png" alt="Mechanical" loading="eager" fetchPriority="high" />
-                <span>Mechanical</span>
-              </div>
-              <div className="icon-item" onClick={() => handlePanelClick('electrical')}>
-                <img src="/assets/lightbulb.png" alt="Electrical" loading="eager" fetchPriority="high" />
-                <span>Electrical</span>
-              </div>
-              <div className="icon-item" onClick={() => handlePanelClick('software')}>
-                <img src="/assets/monitor.png" alt="Software" loading="eager" fetchPriority="high" />
-                <span>Software</span>
+        isMobile ? (
+          <MobileHome onOpenPanel={handlePanelClick} />
+        ) : (
+          <InteractiveHomeBG>
+            <div className="text-container">
+              <div className="content-box">
+                <div className="internal-tab">home</div>
+                <h1 className="main-title">hey, <span className="highlight">i’m colin!</span></h1>
+                <h2 className="subtitle">Mechatronics Engineer who loves robotics, offroading, and AI</h2>
+                <img className="bidoof" src="/assets/bidoof.png" alt="Bidoof" loading="eager" fetchPriority="high" />
+                <div className="icon-row">
+                  <div className="icon-item" onClick={() => handlePanelClick('about')}>
+                    <img src="/assets/bubble.png" alt="About Me" loading="eager" fetchPriority="high" />
+                    <span>About Me</span>
+                  </div>
+                  <div className="icon-item" onClick={() => handlePanelClick('mechanical')}>
+                    <img src="/assets/gear.png" alt="Mechanical" loading="eager" fetchPriority="high" />
+                    <span>Mechanical</span>
+                  </div>
+                  <div className="icon-item" onClick={() => handlePanelClick('electrical')}>
+                    <img src="/assets/lightbulb.png" alt="Electrical" loading="eager" fetchPriority="high" />
+                    <span>Electrical</span>
+                  </div>
+                  <div className="icon-item" onClick={() => handlePanelClick('software')}>
+                    <img src="/assets/monitor.png" alt="Software" loading="eager" fetchPriority="high" />
+                    <span>Software</span>
+                  </div>
+                </div>
               </div>
             </div>
-            </div>
-          </div>
-        </InteractiveHomeBG>
+          </InteractiveHomeBG>
+        )
       )}
 
       {/* Panel overlay + collage */}
@@ -528,7 +713,12 @@ function App() {
             }}
           >
             {SECTIONS.map(sec => (
-              <div key={sec.key} className="panel-section" data-panel-key={sec.key}>
+              <div
+                key={sec.key}
+                className="panel-section"
+                data-panel-key={sec.key}
+                ref={el => (sectionRefs.current[sec.key] = el)}
+              >
                 <h2>{sec.title}</h2>
                 <div className="panel-strip" onWheel={(e) => e.stopPropagation()} style={{ gap: layout.gap }}>
                   {sec.items.map((item) => renderImage(item, sec.key))}
@@ -560,7 +750,6 @@ function App() {
                       className="w-full h-full object-cover select-none"
                       draggable="false"
                       style={{
-                        // keep crop consistent with tiles but a tad more centered
                         objectPosition: '50% 40%',
                         willChange: 'transform',
                         backfaceVisibility: 'hidden',
