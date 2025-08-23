@@ -119,6 +119,11 @@ const detectEnv = () => {
   return { isIOS, isSafari };
 };
 
+/**
+ * Compute per-breakpoint sizes and crop position.
+ * We keep object-fit: cover (cropped), make tiles TALLER,
+ * and bias the crop slightly upward so heads aren't chopped.
+ */
 const computeLayout = () => {
   const { isSafari } = detectEnv();
   const w = Math.max(320, window.innerWidth || 1280);
@@ -128,16 +133,24 @@ const computeLayout = () => {
   const tablet = w > 640 && w <= 1024;
 
   // base widths (px) per breakpoint
-  let tileW = mobile ? Math.min(0.84 * w, 340)
-           : tablet ? Math.min(0.36 * w, 420)
-           : Math.min(0.28 * w, 460);
+  let tileW = mobile ? Math.min(0.84 * w, 360)
+           : tablet ? Math.min(0.36 * w, 440)
+           : Math.min(0.28 * w, 480);
 
-  // Safari tends to render larger; nudge down a bit
+  // Safari tends to render a touch larger; nudge down a bit
   if (isSafari) tileW *= 0.92;
 
-  const tileH = Math.round(tileW * 0.62); // landscape-ish
+  // TALLER aspect (height/width). Previously ~0.62 (landscape-ish).
+  // Now we go portrait-leaning for richer vertical composition.
+  const aspectHOverW = mobile ? 1.05 : tablet ? 0.95 : 0.85;
+  const tileH = Math.round(tileW * aspectHOverW);
+
+  // Thumbnails: also taller
   const thumbW = mobile ? 90 : 120;
-  const thumbH = Math.round(thumbW * 0.6);
+  const thumbH = Math.round(thumbW * 0.9);
+
+  // Upward crop bias (percent from top). Higher = show more upper content.
+  const cropY = mobile ? 42 : tablet ? 38 : 35;
 
   return {
     tileW: `${Math.round(tileW)}px`,
@@ -145,6 +158,7 @@ const computeLayout = () => {
     thumbW: `${thumbW}px`,
     thumbH: `${thumbH}px`,
     gap: mobile ? '10px' : '14px',
+    cropY, // used in objectPosition
   };
 };
 
@@ -368,7 +382,7 @@ function App() {
     setFocus({ ...item, section: sectionKey });
   };
 
-  // Responsive tile renderer
+  // Responsive tile renderer (taller + biased crop)
   const renderImage = (item, sectionKey) => {
     const onTileKeyDown = (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -399,6 +413,8 @@ function App() {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
+              // <-- key change: slightly higher vertical focus across browsers
+              objectPosition: `50% ${layout.cropY}%`,
               willChange: 'transform',
               backfaceVisibility: 'hidden',
               transformStyle: 'preserve-3d',
@@ -507,8 +523,8 @@ function App() {
             ref={collageRef}
             id="projects"
             style={{
-              // keep collage height reasonable on phones (uses --vh to fix iOS Safari)
-              height: 'min(calc(var(--vh, 1vh) * 70), 720px)',
+              // allow a bit more vertical room for taller tiles (uses --vh for iOS)
+              height: 'min(calc(var(--vh, 1vh) * 74), 820px)',
             }}
           >
             {SECTIONS.map(sec => (
@@ -543,7 +559,13 @@ function App() {
                       fetchPriority="high"
                       className="w-full h-full object-cover select-none"
                       draggable="false"
-                      style={{ willChange: 'transform', backfaceVisibility: 'hidden', transformStyle: 'preserve-3d' }}
+                      style={{
+                        // keep crop consistent with tiles but a tad more centered
+                        objectPosition: '50% 40%',
+                        willChange: 'transform',
+                        backfaceVisibility: 'hidden',
+                        transformStyle: 'preserve-3d'
+                      }}
                     />
                   </motion.div>
 
@@ -580,7 +602,15 @@ function App() {
                         title={item.title}
                         style={{ width: layout.thumbW, height: layout.thumbH }}
                       >
-                        <img src={item.src} alt={item.title} loading="eager" decoding="sync" fetchPriority="high" className="w-full h-full object-cover" />
+                        <img
+                          src={item.src}
+                          alt={item.title}
+                          loading="eager"
+                          decoding="sync"
+                          fetchPriority="high"
+                          className="w-full h-full object-cover"
+                          style={{ objectPosition: `50% ${layout.cropY}%` }}
+                        />
                       </button>
                     ))}
                   </div>
