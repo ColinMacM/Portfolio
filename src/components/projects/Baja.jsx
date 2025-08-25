@@ -48,7 +48,6 @@ const SafetyDoc = "/assets/SafetyDoc.png";
 
 const Chassis01 = "/assets/chassis-01.png";
 const Chassis02 = "/assets/chassis-02.png";
-const Chassis03 = "/assets/chassis-03.png";
 const Chassis04 = "/assets/chassis-04.png";
 const Chassis05 = "/assets/chassis-05.png";
 const Chassis06 = "/assets/chassis-06.jpg";
@@ -487,9 +486,6 @@ export default function Baja() {
 
         {/* Equivalent force cases */}
         <div className="mt-6 grid md:grid-cols-2 gap-6">
-          <Reveal from="up">
-            <img src={Chassis03} alt="Equivalent force cases & boundary setup" className="w-full rounded-xl" loading="lazy" />
-          </Reveal>
           <Reveal from="up" delay={60}>
             <img src={Chassis05} alt="Post-iteration frontal case results" className="w-full rounded-xl" loading="lazy" />
           </Reveal>
