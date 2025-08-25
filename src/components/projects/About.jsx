@@ -1,7 +1,7 @@
+// src/components/about/About.jsx
 import React, { useRef } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { FiDownload, FiAward, FiCpu, FiTool, FiMusic, FiBookOpen } from "react-icons/fi";
 import TakeMeBack from "../TakeMeBack.jsx";
 
 // ---------- Assets (place these files under src/assets/) ----------
@@ -14,7 +14,6 @@ const FRCGroup = "/assets/FRCGroup.jpg"; // still used in media grid
 const FRCTechnical = "/assets/FRCTechnical.jpg"; // replaces full-bleed group photo
 const RobotMove = "/assets/RobotMove.mp4";
 const JazzBand = "/assets/JazzBand.jpg"; // replaces FishMongy attachment
-const ResumePDF = "/assets/Resume.pdf"; // change name if different
 
 // ---------- Small, reusable scroll-reveal component ----------
 function Reveal({
@@ -109,7 +108,6 @@ export default function About() {
         </div>
       </Section>
 
-
       {/* LONGER STORY — two-column: text (left) + photo (right) */}
       <Section>
         <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
@@ -146,8 +144,8 @@ export default function About() {
           <Reveal from="up">
             <p className="text-lg sm:text-xl leading-relaxed text-white/90 max-w-4xl">
               I then entered high school and did First Robotics Competition (FRC), and later became the President of the
-              Robotics Club. I was responsible for the drivetrain, where we used a 6‑wheel drive train, and I wired up
-              the RoboRIO, wheels, and CAN‑Bus lines during the pandemic.
+              Robotics Club. I was responsible for the drivetrain, where we used a 6-wheel drive train, and I wired up
+              the RoboRIO, wheels, and CAN-Bus lines during the pandemic.
             </p>
           </Reveal>
 
@@ -161,7 +159,7 @@ export default function About() {
             />
           </Reveal>
 
-          {/* media grid: two pictures + 1s looping video (unchanged aside from alt text) */}
+          {/* media grid: two pictures + 1s looping video */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <Reveal from="left">
               <img src={FRC} alt="FRC robot" className="w-full rounded-xl" loading="lazy" />
@@ -184,7 +182,7 @@ export default function About() {
         </div>
       </Section>
 
-      {/* MUSIC + FRENCH + FISHMONGER — two-column with Jazz Band image (attachment removed) */}
+      {/* MUSIC + FRENCH + FISHMONGER — two-column with Jazz Band image */}
       <Section>
         <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-start">
           <Reveal from="up">
@@ -208,31 +206,18 @@ export default function About() {
         </div>
       </Section>
 
-      {/* RESUME CTA */}
-      <Section>
-        <Reveal from="up" once={false}>
-          <div className="flex flex-wrap items-center gap-4">
-            <a
-              href={ResumePDF}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-2xl border border-orange-500/40 bg-orange-500/10 px-5 py-3 text-base font-medium text-orange-300 hover:bg-orange-500/20 focus:outline-none focus:ring-2 focus:ring-orange-400/50"
-            >
-              <FiDownload /> Download Resume
-            </a>
-            <span className="text-sm text-white/60">PDF • opens in a new tab</span>
-          </div>
-        </Reveal>
-      </Section>
-
       {/* FINAL QUESTION / LINK BACK HOME */}
       <Section className="pb-28">
         <Reveal from="up">
           <p className="text-xl sm:text-2xl text-white/90">
-            Do you want to see the stuff that I have done in {" "}
-              <Link to="/" state={{ openPanel: "mechanical" }} className="text-orange-300 underline decoration-orange-400/40 hover:decoration-orange-300">
-                University
-              </Link>
+            Do you want to see the stuff that I have done in{" "}
+            <Link
+              to="/"
+              state={{ openPanel: "mechanical" }}
+              className="text-orange-300 underline decoration-orange-400/40 hover:decoration-orange-300"
+            >
+              University
+            </Link>
             ?
           </p>
         </Reveal>
@@ -243,4 +228,3 @@ export default function About() {
     </div>
   );
 }
-

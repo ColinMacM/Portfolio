@@ -111,7 +111,7 @@ const getBootReadyFromSession = () => {
 };
 const setBootReadyInSession = () => { try { sessionStorage.setItem('assetsReady', '1'); } catch {} };
 
-// --------- Layout helpers (responsive tiles per browser/viewport) ------------
+// --------- Layout helpers ----------------------------------------------------
 const detectEnv = () => {
   const ua = navigator.userAgent;
   const isIOS = /iP(ad|hone|od)/i.test(ua);
@@ -120,35 +120,24 @@ const detectEnv = () => {
   return { isIOS, isSafari, isMobileUA };
 };
 
-/**
- * Compute base sizes and crop position.
- * Keeps object-fit: cover (cropped), makes tiles TALLER,
- * and biases the crop slightly upward so heads aren't chopped.
- */
+/** Base sizes + crop position */
 const computeLayout = () => {
   const { isSafari, isMobileUA } = detectEnv();
   const w = Math.max(320, window.innerWidth || 1280);
 
-  // breakpoints
   const mobile = w <= 640;
   const tablet = w > 640 && w <= 1024;
 
-  // base widths (px) per breakpoint
   let tileW = mobile ? Math.min(0.84 * w, 360)
            : tablet ? Math.min(0.36 * w, 440)
            : Math.min(0.28 * w, 480);
-
   if (isSafari) tileW *= 0.92;
 
-  // Portrait-leaning aspect ratios
-  const aspectHOverW = mobile ? 1.05 : tablet ? 0.95 : 0.85;
+  const aspectHOverW = mobile ? 1.05 : tablet ? 0.95 : 0.85; // taller
   const tileH = Math.round(tileW * aspectHOverW);
 
-  // Thumbnails: taller as well
   const thumbW = mobile ? 90 : 120;
   const thumbH = Math.round(thumbW * 0.9);
-
-  // Upward crop bias
   const cropY = mobile ? 42 : tablet ? 38 : 35;
 
   return {
@@ -158,13 +147,12 @@ const computeLayout = () => {
     thumbH: `${thumbH}px`,
     gap: mobile ? '10px' : '14px',
     cropY,
-    isMobile: mobile || isMobileUA, // expose to render branch
+    isMobile: mobile || isMobileUA,
   };
 };
 
 // -------------------- Mobile Home (vertical slide) ---------------------------
 function MobileHome({ onOpenPanel }) {
-  // Inline CSS so you don’t have to touch App.css
   const vh = 'calc(var(--vh, 1vh) * 100)';
   return (
     <div
@@ -183,40 +171,24 @@ function MobileHome({ onOpenPanel }) {
         .mobile-slide {
           min-height: ${vh};
           scroll-snap-align: start;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 24px;
-          color: white;
-          text-align: center;
+          display: flex; align-items: center; justify-content: center;
+          padding: 24px; color: white; text-align: center;
         }
         .mobile-card {
           width: min(92vw, 540px);
           background: rgba(0,0,0,0.4);
           border: 1px solid rgba(255,255,255,0.12);
-          border-radius: 24px;
-          box-shadow: 0 10px 40px -10px rgba(0,0,0,0.6);
-          padding: 24px 20px;
-          backdrop-filter: blur(6px);
+          border-radius: 24px; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.6);
+          padding: 24px 20px; backdrop-filter: blur(6px);
         }
-        .mobile-card h1, .mobile-card h2 { margin: 0; }
-        .mobile-cta {
-          margin-top: 14px;
-          padding: 10px 16px;
-          border-radius: 12px;
-          background: rgba(255,255,255,0.12);
-          border: 1px solid rgba(255,255,255,0.18);
-          color: white;
-        }
+        .mobile-cta { margin-top: 14px; padding: 10px 16px; border-radius: 12px;
+          background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: white; }
         .mobile-cta:active { transform: scale(0.98); }
-        .mobile-icon {
-          width: 64px; height: 64px; object-fit: contain; margin: 10px auto 4px; display: block;
-        }
+        .mobile-icon { width: 64px; height: 64px; object-fit: contain; margin: 10px auto 4px; display: block; }
         .mobile-bidoof { width: 84px; height: 84px; object-fit: contain; margin: 12px auto 0; display:block; }
         .hint { margin-top: 10px; font-size: 12px; opacity: 0.8; }
       `}</style>
 
-      {/* Slide 1: Intro */}
       <section className="mobile-slide">
         <div className="mobile-card">
           <div className="internal-tab">home</div>
@@ -227,7 +199,6 @@ function MobileHome({ onOpenPanel }) {
         </div>
       </section>
 
-      {/* Slide 2: About */}
       <section className="mobile-slide">
         <div className="mobile-card">
           <img className="mobile-icon" src="/assets/bubble.png" alt="About icon" />
@@ -237,7 +208,6 @@ function MobileHome({ onOpenPanel }) {
         </div>
       </section>
 
-      {/* Slide 3: Mechanical */}
       <section className="mobile-slide">
         <div className="mobile-card">
           <img className="mobile-icon" src="/assets/gear.png" alt="Mechanical icon" />
@@ -247,7 +217,6 @@ function MobileHome({ onOpenPanel }) {
         </div>
       </section>
 
-      {/* Slide 4: Electrical */}
       <section className="mobile-slide">
         <div className="mobile-card">
           <img className="mobile-icon" src="/assets/lightbulb.png" alt="Electrical icon" />
@@ -257,7 +226,6 @@ function MobileHome({ onOpenPanel }) {
         </div>
       </section>
 
-      {/* Slide 5: Software */}
       <section className="mobile-slide">
         <div className="mobile-card">
           <img className="mobile-icon" src="/assets/monitor.png" alt="Software icon" />
@@ -266,16 +234,59 @@ function MobileHome({ onOpenPanel }) {
           <button className="mobile-cta" onClick={() => onOpenPanel('software')}>Open Software</button>
           <div className="hint" style={{marginTop:12}}>
             Or check out my music set —
-            <button
-              className="mobile-cta"
-              style={{ marginLeft: 8, padding: '6px 10px' }}
-              onClick={() => window.open(MUSIC_URL, '_blank', 'noopener,noreferrer')}
-            >
+            <button className="mobile-cta" style={{ marginLeft: 8, padding: '6px 10px' }}
+              onClick={() => window.open(MUSIC_URL, '_blank', 'noopener,noreferrer')}>
               Music
             </button>
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+// -------------------- Mobile Collage (grid instead of strips) ----------------
+function MobileCollage({ onOpenItem, layout }) {
+  const vh = 'calc(var(--vh, 1vh) * 74)';
+  return (
+    <div
+      className="mobile-collage"
+      style={{
+        height: `min(${vh}, 820px)`,
+        overflowY: 'auto',
+        padding: '8px 14px 16px',
+      }}
+    >
+      <style>{`
+        .mob-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: ${layout.gap}; }
+        .mob-tile { position: relative; width: 100%; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 14px;
+          box-shadow: 0 10px 30px -12px rgba(0,0,0,0.55); background: #111; }
+        .mob-title { margin-top: 6px; font-size: 13px; color: rgba(255,255,255,0.85); text-align: center; }
+      `}</style>
+
+      {SECTIONS.map(sec => (
+        <section key={sec.key} style={{ marginBottom: '18px' }}>
+          <h2 style={{ color: 'white', textAlign: 'center', margin: '10px 0 12px' }}>{sec.title}</h2>
+          <div className="mob-grid">
+            {sec.items.map(item => (
+              <div key={item.slug} onClick={() => onOpenItem(item, sec.key)} className="mob-item" role="button" tabIndex={0}>
+                <div className="mob-tile">
+                  <img
+                    src={item.src}
+                    alt={item.title}
+                    loading="eager"
+                    decoding="sync"
+                    fetchPriority="high"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: `50% ${layout.cropY}%` }}
+                    draggable="false"
+                  />
+                </div>
+                <div className="mob-title">{item.title}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }
@@ -310,20 +321,18 @@ function App() {
       const baseW = parseInt(layout.tileW, 10);
       const baseH = parseInt(layout.tileH, 10);
       const gap = parseFloat(layout.gap) || 0;
+      const EPS = 1; // small fudge for Opera/Blink rounding
 
       const next = {};
       for (const sec of SECTIONS) {
         const n = sec.items.length;
         const el = sectionRefs.current[sec.key];
         const strip = el?.querySelector('.panel-strip');
-        if (!strip || !baseW || n < 3) continue; // only adjust sections with 3+ tiles
+        if (!strip || !baseW || n < 3) continue;
 
-        const stripW = strip.clientWidth;
-        const required = n * baseW + gap * (n - 1);
-
+        const stripW = Math.floor(strip.clientWidth);
         // scale uniformly if needed so all tiles + gaps fit
-        const scale = Math.max(0.5, Math.min(1, (stripW - gap * (n - 1)) / (n * baseW)));
-
+        const scale = Math.max(0.5, Math.min(1, (stripW - gap * (n - 1) - EPS) / (n * baseW)));
         if (scale < 1) {
           const w = Math.floor(baseW * scale);
           const h = Math.floor(baseH * scale);
@@ -333,23 +342,20 @@ function App() {
       setFitSizeBySection(next);
     };
 
-    const ros = [];
-    // Observe each section container
+    const observers = [];
     SECTIONS.forEach(s => {
       const node = sectionRefs.current[s.key];
       if (!node) return;
       const ro = new ResizeObserver(computeAllFits);
       ro.observe(node);
-      ros.push(ro);
+      observers.push(ro);
     });
 
-    // Run once now and on window changes
     computeAllFits();
     window.addEventListener('resize', computeAllFits);
     window.addEventListener('orientationchange', computeAllFits);
-
     return () => {
-      ros.forEach(ro => ro.disconnect());
+      observers.forEach(ro => ro.disconnect());
       window.removeEventListener('resize', computeAllFits);
       window.removeEventListener('orientationchange', computeAllFits);
     };
@@ -361,7 +367,7 @@ function App() {
     return arr;
   }, []);
 
-  // Setup dynamic 1vh = innerHeight * 0.01 for iOS Safari and update on resize
+  // Setup dynamic 1vh for iOS Safari
   useEffect(() => {
     const setVH = () => {
       document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
@@ -384,7 +390,7 @@ function App() {
       await preloadFromManifest((p) => !cancelled && setProgress(p));
       if (!cancelled) {
         setBootReady(true);
-        setBootReadyInSession(); // remember for this tab
+        setBootReadyInSession();
       }
     })();
     return () => { cancelled = true; };
@@ -393,14 +399,12 @@ function App() {
   // Deep-link handling
   useEffect(() => {
     const state = location.state || {};
-    the: {
-      const openPanel = state.openPanel;
-      const openItem = state.openItem;
-      if (openPanel && SECTION_NAMES.includes(openPanel)) {
-        pendingPanelRef.current = { panel: openPanel, item: openItem || null };
-        setActivePanel(OVERLAY_DEFAULT_PANEL);
-        navigate(location.pathname, { replace: true, state: null });
-      }
+    const openPanel = state.openPanel;
+    const openItem = state.openItem;
+    if (openPanel && SECTION_NAMES.includes(openPanel)) {
+      pendingPanelRef.current = { panel: openPanel, item: openItem || null };
+      setActivePanel(OVERLAY_DEFAULT_PANEL);
+      navigate(location.pathname, { replace: true, state: null });
     }
   }, [location, navigate]);
 
@@ -445,7 +449,9 @@ function App() {
     return () => { document.body.style.overflow = 'auto'; };
   }, [activePanel]);
 
+  // parallax + nearest section detection (desktop only)
   useEffect(() => {
+    if (layout.isMobile) return;
     const collage = collageRef.current;
     if (!collage) return;
     const handleScroll = () => {
@@ -473,7 +479,7 @@ function App() {
     collage.addEventListener('scroll', handleScroll);
     handleScroll();
     return () => collage.removeEventListener('scroll', handleScroll);
-  }, [activePanel]);
+  }, [activePanel, layout.isMobile]);
 
   const scrollToSection = useCallback((panel) => {
     const collage = collageRef.current;
@@ -495,7 +501,7 @@ function App() {
   }, [activePanel, scrollToSection]);
 
   const handleWheelSnap = useCallback((e) => {
-    if (!activePanel) return;
+    if (!activePanel || layout.isMobile) return;
     if (focus) return;
     if (e.target instanceof Element && e.target.closest('.panel-strip')) return;
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
@@ -511,25 +517,16 @@ function App() {
       setActivePanel(nextPanel);
       scrollToSection(nextPanel);
     }
-  }, [activePanel, focus, scrollToSection]);
+  }, [activePanel, focus, scrollToSection, layout.isMobile]);
 
   useEffect(() => {
+    if (layout.isMobile) return;
     const el = collageRef.current;
     if (!el || !activePanel || focus) return;
     const opts = { passive: false };
     el.addEventListener('wheel', handleWheelSnap, opts);
     return () => el.removeEventListener('wheel', handleWheelSnap, opts);
-  }, [activePanel, focus, handleWheelSnap]);
-
-  useEffect(() => {
-    if (!activePanel || focus) return;
-    const onKey = (e) => {
-      if (e.key === 'ArrowLeft') stepSection(-1);
-      if (e.key === 'ArrowRight') stepSection(1);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [activePanel, focus, stepSection]);
+  }, [activePanel, focus, handleWheelSnap, layout.isMobile]);
 
   useEffect(() => {
     if (!focus) return;
@@ -542,31 +539,22 @@ function App() {
 
   const handlePanelClick = (panel) => {
     setActivePanel(panel);
-    setTimeout(() => scrollToSection(panel), OVERLAY_ANIM_MS);
+    if (!layout.isMobile) setTimeout(() => scrollToSection(panel), OVERLAY_ANIM_MS);
   };
 
   const handleBackClick = () => {
     setIsExiting(true);
-    setTimeout(() => {
-      setActivePanel(null);
-      setIsExiting(false);
-    }, 600);
+    setTimeout(() => { setActivePanel(null); setIsExiting(false); }, 600);
   };
 
-  const openItem = (item, sectionKey) => {
-    setFocus({ ...item, section: sectionKey });
-  };
+  const openItem = (item, sectionKey) => setFocus({ ...item, section: sectionKey });
 
-  // Responsive tile renderer (taller + biased crop) with per-section fit
+  // tile renderer (desktop strips)
   const renderImage = (item, sectionKey) => {
     const onTileKeyDown = (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openItem(item, sectionKey);
-      }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openItem(item, sectionKey); }
     };
 
-    // Use fitted size for sections with 3+ items when present; else base size
     const size = fitSizeBySection[sectionKey]
       ? fitSizeBySection[sectionKey]
       : { w: layout.tileW, h: layout.tileH };
@@ -591,13 +579,9 @@ function App() {
             decoding="sync"
             fetchPriority="high"
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
+              width: '100%', height: '100%', objectFit: 'cover',
               objectPosition: `50% ${layout.cropY}%`,
-              willChange: 'transform',
-              backfaceVisibility: 'hidden',
-              transformStyle: 'preserve-3d',
+              willChange: 'transform', backfaceVisibility: 'hidden', transformStyle: 'preserve-3d',
             }}
             draggable="false"
           />
@@ -612,6 +596,16 @@ function App() {
 
   return (
     <div className="gradient-bg">
+      {/* Hide per-section scrollbars everywhere (Opera/Firefox/Chromium/Safari) */}
+      <style>{`
+        .panel-strip {
+          overflow-x: hidden; /* content fits; disable inner horizontal scroll */
+          -ms-overflow-style: none;          /* IE/Edge legacy */
+          scrollbar-width: none;             /* Firefox */
+        }
+        .panel-strip::-webkit-scrollbar { height: 0 !important; width: 0 !important; background: transparent; }
+      `}</style>
+
       {/* Boot loader shows ONCE per tab/session */}
       {!bootReady && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black text-white">
@@ -646,10 +640,8 @@ function App() {
             </div>
             <div className="text-white/80 text-sm tracking-wide">{pct}%</div>
 
-            <button
-              className="mt-2 text-xs px-3 py-1 rounded-md bg-white/10 hover:bg-white/15"
-              onClick={() => { setBootReady(true); setBootReadyInSession(); }}
-            >
+            <button className="mt-2 text-xs px-3 py-1 rounded-md bg-white/10 hover:bg-white/15"
+              onClick={() => { setBootReady(true); setBootReadyInSession(); }}>
               Skip
             </button>
           </div>
@@ -657,7 +649,7 @@ function App() {
         </div>
       )}
 
-      {/* Home: desktop/tablet = original, mobile = vertical slides */}
+      {/* Home */}
       {bootReady && activePanel === null && (
         isMobile ? (
           <MobileHome onOpenPanel={handlePanelClick} />
@@ -698,46 +690,50 @@ function App() {
         <div ref={overlayRef} className={`panel-overlay ${isExiting ? 'slide-down' : 'slide-up'}`}>
           <button className="back-button" onClick={handleBackClick}>Back to Home</button>
 
-          <div className="nav-arrows" aria-hidden="false">
-            <button className="arrow left" onClick={() => stepSection(-1)} aria-label="Previous section">‹</button>
-            <button className="arrow right" onClick={() => stepSection(1)} aria-label="Next section">›</button>
-          </div>
-
-          <div
-            className="panel-collage"
-            ref={collageRef}
-            id="projects"
-            style={{
-              // allow a bit more vertical room for taller tiles (uses --vh for iOS)
-              height: 'min(calc(var(--vh, 1vh) * 74), 820px)',
-            }}
-          >
-            {SECTIONS.map(sec => (
-              <div
-                key={sec.key}
-                className="panel-section"
-                data-panel-key={sec.key}
-                ref={el => (sectionRefs.current[sec.key] = el)}
-              >
-                <h2>{sec.title}</h2>
-                <div className="panel-strip" onWheel={(e) => e.stopPropagation()} style={{ gap: layout.gap }}>
-                  {sec.items.map((item) => renderImage(item, sec.key))}
-                </div>
+          {/* Desktop/Tablet: original horizontal collage; Mobile: grid collage */}
+          {!isMobile ? (
+            <>
+              <div className="nav-arrows" aria-hidden="false">
+                <button className="arrow left" onClick={() => stepSection(-1)} aria-label="Previous section">‹</button>
+                <button className="arrow right" onClick={() => stepSection(1)} aria-label="Next section">›</button>
               </div>
-            ))}
-          </div>
 
-          {/* Focus overlay */}
+              <div
+                className="panel-collage"
+                ref={collageRef}
+                id="projects"
+                style={{ height: 'min(calc(var(--vh, 1vh) * 74), 820px)' }}
+              >
+                {SECTIONS.map(sec => (
+                  <div
+                    key={sec.key}
+                    className="panel-section"
+                    data-panel-key={sec.key}
+                    ref={el => (sectionRefs.current[sec.key] = el)}
+                  >
+                    <h2>{sec.title}</h2>
+                    <div className="panel-strip" onWheel={(e) => e.stopPropagation()} style={{ gap: layout.gap }}>
+                      {sec.items.map((item) => renderImage(item, sec.key))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <MobileCollage onOpenItem={openItem} layout={layout} />
+          )}
+
+          {/* Focus overlay (shared) */}
           <AnimatePresence>
             {focus && (
-              <motion.div className="fixed inset-0 z-[1001] bg-black/90 flex flex-col" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <motion.div className="fixed inset-0 z-[1001] bg-black/90 flex flex-col"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <div className="relative flex-1 flex items-center justify-center px-4">
                   <motion.div
                     layoutId={`frame-${focus.slug}`}
                     className="overflow-hidden rounded-lg shadow-2xl"
                     style={{
                       width: 'min(92vw, 1400px)',
-                      // use --vh so iOS Safari doesn't hide the title / overflow
                       height: 'min(calc(var(--vh, 1vh) * 78), 850px)',
                     }}
                   >
@@ -749,12 +745,8 @@ function App() {
                       fetchPriority="high"
                       className="w-full h-full object-cover select-none"
                       draggable="false"
-                      style={{
-                        objectPosition: '50% 40%',
-                        willChange: 'transform',
-                        backfaceVisibility: 'hidden',
-                        transformStyle: 'preserve-3d'
-                      }}
+                      style={{ objectPosition: '50% 40%', willChange: 'transform',
+                               backfaceVisibility: 'hidden', transformStyle: 'preserve-3d' }}
                     />
                   </motion.div>
 
@@ -772,11 +764,13 @@ function App() {
                     {focus.title}
                   </motion.button>
 
-                  <button className="absolute top-4 right-4 text-white/80 hover:text-white text-xl px-3 py-1 rounded-md bg-white/10" onClick={() => setFocus(null)} aria-label="Close">
+                  <button className="absolute top-4 right-4 text-white/80 hover:text-white text-xl px-3 py-1 rounded-md bg-white/10"
+                    onClick={() => setFocus(null)} aria-label="Close">
                     Esc
                   </button>
                 </div>
 
+                {/* Thumbnails */}
                 <div className="w-full shrink-0 border-t border-white/15 bg-black/60">
                   <div className="flex gap-2 md:gap-3 overflow-x-auto p-3">
                     {ALL_ITEMS.map(item => (

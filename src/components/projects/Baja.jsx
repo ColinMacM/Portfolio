@@ -149,7 +149,7 @@ export default function Baja() {
                 <h3 className="text-xl font-semibold">My Roles</h3>
               </div>
               <ul className="mt-4 space-y-2 text-white/90">
-                <li>2024: <em>Steering Lead, Safety Captain</em></li>
+                <li>2024: <em>Mechanical Engineering Intern, Steering Lead, Safety Captain</em></li>
                 <li>2025: <em>Chassis Lead, Supervisor</em></li>
               </ul>
             </div>
